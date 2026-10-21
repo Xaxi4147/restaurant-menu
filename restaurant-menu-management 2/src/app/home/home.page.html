@@ -1,0 +1,198 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Restaurant Menu Management</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-grid fixed>
+    <ion-row>
+      <ion-col size="12" size-lg="5">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>
+              {{ editingId ? 'Edit menu item' : 'Create new menu item' }}
+            </ion-card-title>
+          </ion-card-header>
+
+          <ion-card-content>
+            <form (ngSubmit)="saveRecord()" novalidate>
+              <ion-list>
+                <ion-item>
+                  <ion-input
+                    label="Name *"
+                    labelPlacement="stacked"
+                    name="name"
+                    [(ngModel)]="form.name"
+                    placeholder="Example: Chicken soup"
+                    required
+                  ></ion-input>
+                </ion-item>
+                <ion-note color="danger" *ngIf="submitted && !form.name.trim()">
+                  Name is required.
+                </ion-note>
+
+                <ion-item>
+                  <ion-select
+                    label="Category *"
+                    labelPlacement="stacked"
+                    name="category"
+                    [(ngModel)]="form.category"
+                    placeholder="Select category"
+                    required
+                  >
+                    <ion-select-option value="Starter">Starter</ion-select-option>
+                    <ion-select-option value="Main Course">Main Course</ion-select-option>
+                    <ion-select-option value="Dessert">Dessert</ion-select-option>
+                    <ion-select-option value="Drink">Drink</ion-select-option>
+                    <ion-select-option value="Special">Special</ion-select-option>
+                  </ion-select>
+                </ion-item>
+                <ion-note color="danger" *ngIf="submitted && !form.category.trim()">
+                  Category is required.
+                </ion-note>
+
+                <ion-item>
+                  <ion-textarea
+                    label="Description"
+                    labelPlacement="stacked"
+                    name="description"
+                    [(ngModel)]="form.description"
+                    placeholder="Short description for customer or staff"
+                  ></ion-textarea>
+                </ion-item>
+
+                <ion-item>
+                  <ion-input
+                    label="Ingredients"
+                    labelPlacement="stacked"
+                    name="ingredients"
+                    [(ngModel)]="form.ingredients"
+                    placeholder="Example: chicken, onion, carrot"
+                  ></ion-input>
+                </ion-item>
+
+                <ion-item>
+                  <ion-input
+                    label="Allergens"
+                    labelPlacement="stacked"
+                    name="allergens"
+                    [(ngModel)]="form.allergens"
+                    placeholder="Example: gluten, milk, nuts"
+                  ></ion-input>
+                </ion-item>
+
+                <ion-item>
+                  <ion-input
+                    label="Price *"
+                    labelPlacement="stacked"
+                    name="price"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    [(ngModel)]="form.price"
+                    placeholder="Example: 4.50"
+                    required
+                  ></ion-input>
+                </ion-item>
+                <ion-note color="danger" *ngIf="submitted && (form.price === null || form.price < 0)">
+                  Price is required and must be zero or higher.
+                </ion-note>
+
+                <ion-item>
+                  <ion-checkbox
+                    name="available"
+                    [(ngModel)]="form.available"
+                    justify="space-between"
+                  >
+                    Available *
+                  </ion-checkbox>
+                </ion-item>
+
+                <ion-item>
+                  <ion-input
+                    label="Preparation time"
+                    labelPlacement="stacked"
+                    name="preparationTime"
+                    type="number"
+                    min="0"
+                    [(ngModel)]="form.preparationTime"
+                    placeholder="Minutes"
+                  ></ion-input>
+                </ion-item>
+
+                <ion-item>
+                  <ion-input
+                    label="Image URL"
+                    labelPlacement="stacked"
+                    name="imageUrl"
+                    [(ngModel)]="form.imageUrl"
+                    placeholder="Optional local or placeholder path"
+                  ></ion-input>
+                </ion-item>
+              </ion-list>
+
+              <div class="form-actions">
+                <ion-button type="submit">
+                  {{ editingId ? 'Save updated record' : 'Create record' }}
+                </ion-button>
+                <ion-button type="button" fill="outline" color="medium" (click)="resetForm()">
+                  Clear
+                </ion-button>
+              </div>
+            </form>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <ion-col size="12" size-lg="7">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Local menu archive</ion-card-title>
+          </ion-card-header>
+
+          <ion-card-content>
+            <ion-searchbar
+              [(ngModel)]="searchTerm"
+              name="searchTerm"
+              placeholder="Search by part of the item name"
+            ></ion-searchbar>
+
+            <ion-note>
+              Showing {{ filteredMenuItems.length }} of {{ menuItems.length }} local records.
+            </ion-note>
+
+            <ion-list *ngIf="filteredMenuItems.length > 0; else emptyState">
+              <ion-item *ngFor="let item of filteredMenuItems">
+                <ion-label>
+                  <h2>{{ item.name }}</h2>
+                  <p>Category: {{ item.category }}</p>
+                  <p>Price: {{ item.price | currency }}</p>
+                  <p>
+                    Availability:
+                    <ion-badge [color]="item.available ? 'success' : 'medium'">
+                      {{ item.available ? 'Available' : 'Not available' }}
+                    </ion-badge>
+                  </p>
+                </ion-label>
+
+                <div class="record-actions" slot="end">
+                  <ion-button size="small" fill="outline" (click)="editRecord(item)">
+                    Edit
+                  </ion-button>
+                  <ion-button size="small" color="danger" fill="outline" (click)="confirmDelete(item)">
+                    Delete
+                  </ion-button>
+                </div>
+              </ion-item>
+            </ion-list>
+
+            <ng-template #emptyState>
+              <p class="empty-message">No matching menu records found.</p>
+            </ng-template>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>
